@@ -1,12 +1,24 @@
-all: libnbdclient.so
+XEN_ROOT = $(CURDIR)/../..
+include $(XEN_ROOT)/tools/Rules.mk
 
-CC=gcc
-CFLAGS=-Wall -Wextra -Werror -O0 -g -m32
+MAJOR = 0
+MINOR = 1
+NAME = libnbdclient
+VERSION = $(MAJOR).$(MINOR)
+LIB = $(NAME).so.$(VERSION)
 
-libnbdclient.so: nbdclient.c
-	$(CC) $(CFLAGS) -fPIC -shared -o $@ nbdclient.c -ldl
+$(LIB): nbdclient.c
+	$(CC) -fPIC -shared -Wl,-soname,$(NAME).so.$(MAJOR) -ldl $^ -o $@
+
+.PHONY: all
+all: build
+
+build: $(LIB)
+
+.PHONY: install
+intall:
+	$(INSTALL_PROG) $(LIB) $(DESTDIR)$(LIBDIR)
 
 .PHONY: clean
-
 clean:
-	rm -f libnbdclient.so test
+	rm -f $(LIB)
